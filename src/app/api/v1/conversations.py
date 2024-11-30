@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,9 +8,9 @@ from ..dependencies import get_current_user
 from ...core.db.database import async_get_db
 from ...crud.crud_conversations import crud_conversations
 from ...crud.crud_users import crud_users
-from ...schemas.conversation import ConversationCreateInternal, ConversationRead, ConversationDelete
+from ...schemas.conversation import ConversationCreateInternal, ConversationRead, ConversationDelete, QueryCreate
 from ...schemas.user import UserRead
-from datetime import datetime
+from datetime import datetime, UTC
 
 router = APIRouter(tags=["conversations"])
 
@@ -22,7 +23,10 @@ async def create_conversation(
     """
     Creates a new conversation for the authenticated user.
     """
-    conversation_internal = ConversationCreateInternal(created_by_user_id=current_user["id"])
+    conversation_internal = ConversationCreateInternal(
+        created_by_user_id=current_user["id"],
+        queries=[]  # Initialize with empty list instance
+    )
     created_conversation: ConversationRead = await crud_conversations.create(db=db, object=conversation_internal)
     return created_conversation
 
@@ -87,5 +91,43 @@ async def delete_conversation(
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    delete_schema = ConversationDelete(is_deleted=True, deleted_at=datetime.now())
+    delete_schema = ConversationDelete(is_deleted=True, deleted_at=datetime.now(UTC))
     await crud_conversations.update(db=db, id=id, object=delete_schema)
+
+
+@router.post("/conversations/{id}/queries", response_model=ConversationRead)
+async def add_query_to_conversation(
+    id: int,
+    query: QueryCreate,
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+    current_user: Annotated[UserRead, Depends(get_current_user)],
+) -> ConversationRead:
+    """
+    Adds a new query to an existing conversation.
+    """
+    conversation = await crud_conversations.get(
+        db=db, schema_to_select=ConversationRead, id=id, created_by_user_id=current_user["id"], is_deleted=False
+    )
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Create new query object with UUID
+    new_query = {
+        "id": str(uuid4()),
+        "query": query.query,
+        "created_at": datetime.now(UTC).isoformat()
+    }
+    
+    # Get existing queries and append new one
+    existing_queries = conversation["queries"]
+    existing_queries.append(new_query)
+    
+    # Update conversation with new queries list
+    update_data = {"queries": existing_queries}
+    await crud_conversations.update(db=db, id=id, object=update_data)
+    
+    # Get and return updated conversation
+    updated_conversation = await crud_conversations.get(
+        db=db, schema_to_select=ConversationRead, id=id, created_by_user_id=current_user["id"], is_deleted=False
+    )
+    return updated_conversation

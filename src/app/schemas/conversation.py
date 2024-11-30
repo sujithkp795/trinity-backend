@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -7,9 +7,22 @@ from pydantic import BaseModel, ConfigDict, Field
 from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 
+class QueryBase(BaseModel):
+    query: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class QueryCreate(QueryBase):
+    pass
+
+
+class QueryRead(QueryBase):
+    id: UUID
+
+
 class ConversationBase(BaseModel):
     """Base schema with shared fields."""
-    pass  # No input fields required for creation
+    queries: List[dict] = Field(default_factory=list)
 
 
 class Conversation(TimestampSchema, UUIDSchema, PersistentDeletion):
@@ -22,6 +35,7 @@ class ConversationRead(BaseModel):
     id: int
     uuid: UUID
     created_by_user_id: int
+    queries: List[dict]
     created_at: datetime
     deleted_at: datetime | None
     is_deleted: bool
@@ -35,6 +49,7 @@ class ConversationCreate(BaseModel):
 class ConversationCreateInternal(ConversationCreate):
     """Internal schema with user mapping for creation."""
     created_by_user_id: int
+    queries: List[dict] = Field(default_factory=list)
 
 
 class ConversationDelete(BaseModel):
