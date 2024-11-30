@@ -107,6 +107,13 @@ class EnvironmentSettings(BaseSettings):
     ENVIRONMENT: EnvironmentOption = config("ENVIRONMENT", default="local")
 
 
+class OpenAISettings(BaseSettings):
+    OPENAI_API_KEY: str = config("OPENAI_API_KEY")
+    OPENAI_MODEL: str = config("OPENAI_MODEL", default="gpt-3.5-turbo")
+    OPENAI_MAX_TOKENS: int = config("OPENAI_MAX_TOKENS", default=2000)
+    OPENAI_TEMPERATURE: float = config("OPENAI_TEMPERATURE", default=0.7)
+
+
 class Settings(
     AppSettings,
     PostgresSettings,
@@ -119,6 +126,7 @@ class Settings(
     RedisRateLimiterSettings,
     DefaultRateLimitSettings,
     EnvironmentSettings,
+    OpenAISettings,
 ):
     CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     CORS_METHODS: List[str] = ["*"]
