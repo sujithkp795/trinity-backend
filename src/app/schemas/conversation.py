@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Annotated, List
 from uuid import UUID
 
@@ -13,7 +13,7 @@ class QueryBase(BaseModel):
 
 
 class QueryCreate(QueryBase):
-    pass
+    response: str
 
 
 class QueryRead(QueryBase):
