@@ -20,6 +20,11 @@ class QueryRead(QueryBase):
     id: UUID
 
 
+class QueryUpdate(BaseModel):
+    query: str
+    response: str
+
+
 class ConversationBase(BaseModel):
     """Base schema with shared fields."""
     queries: List[dict] = Field(default_factory=list)

@@ -7,7 +7,7 @@ class OpenAIService:
         openai.api_key = settings.OPENAI_API_KEY
         self.conversation_history: List[dict] = []
 
-    async def generate_chat_response(self, message: str, follow_up: str | None = None) -> str:
+    async def generate_chat_response(self, message: str, follow_up: str | None = None, image_url: str | None = None) -> str:
         messages = [
             {
                 "role": "system",
@@ -17,12 +17,26 @@ class OpenAIService:
 
         # Add conversation history
         messages.extend(self.conversation_history)
-
+        if image_url:
         # Add current message
-        current_message = {
-            "role": "user",
-            "content": follow_up if follow_up else message
-        }
+            current_message = {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": follow_up if follow_up else message
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": image_url}
+                    }
+                ]
+            }
+        else:
+            current_message = {
+                "role": "user",
+                "content": follow_up if follow_up else message
+            }
         messages.append(current_message)
 
         try:

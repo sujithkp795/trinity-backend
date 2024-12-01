@@ -132,7 +132,7 @@ class Settings(
     CORS_METHODS: List[str] = ["*"]
     CORS_HEADERS: List[str] = ["*"]
     OPENAI_API_KEY: str = config("OPENAI_API_KEY", cast=str)
-    OPENAI_MODEL: str = config("OPENAI_MODEL", cast=str, default="gpt-4")
+    OPENAI_MODEL: str = config("OPENAI_MODEL", cast=str, default="gpt-4o")
     OPENAI_TEMPERATURE: float = config("OPENAI_TEMPERATURE", cast=float, default=0.7)
     OPENAI_MAX_TOKENS: int = config("OPENAI_MAX_TOKENS", cast=int, default=2000)
 
