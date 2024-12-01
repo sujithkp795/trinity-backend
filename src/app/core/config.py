@@ -114,6 +114,13 @@ class OpenAISettings(BaseSettings):
     OPENAI_TEMPERATURE: float = config("OPENAI_TEMPERATURE", default=0.7)
 
 
+class GoogleOAuthSettings(BaseSettings):
+    GOOGLE_CLIENT_ID: str = config("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = config("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI: str = config("GOOGLE_REDIRECT_URI")
+    DEFAULT_PROFILE_IMAGE: str = config("DEFAULT_PROFILE_IMAGE", default="https://default-profile-image-url.com")
+
+
 class Settings(
     AppSettings,
     PostgresSettings,
@@ -127,6 +134,7 @@ class Settings(
     DefaultRateLimitSettings,
     EnvironmentSettings,
     OpenAISettings,
+    GoogleOAuthSettings,
 ):
     CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     CORS_METHODS: List[str] = ["*"]
