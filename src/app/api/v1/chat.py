@@ -16,6 +16,7 @@ router = APIRouter(tags=["chat"])
 # Initialize OpenAI service
 openai_service = OpenAIService()
 
+    
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
@@ -27,7 +28,8 @@ async def chat(
         response = await openai_service.generate_chat_response(
             message=request.message,
             follow_up=request.follow_up,
-            image_url=request.image_url
+            image_url=request.image_url,
+            file=request.file
         )
 
         # Handle conversation creation or update
